@@ -1,5 +1,6 @@
-﻿using System.Diagnostics;
-using System.CommandLine;
+﻿using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.Diagnostics;
 
 namespace Luatrauma.AutoUpdater
 {
@@ -23,23 +24,31 @@ namespace Luatrauma.AutoUpdater
             optionServerOnly.SetDefaultValue(false);
             var optionNightly = new Option<bool>(name: "--nightly", description: "Downloads the nightly patch.");
             optionNightly.SetDefaultValue(false);
+
+            /*
             var argumentRun = new Argument<string[]>("run", "The path to the Barotrauma executable that should be ran after the update finishes.")
             {
                 Arity = ArgumentArity.ZeroOrMore
             };
             argumentRun.SetDefaultValue(null);
+            */
 
-            rootCommand.AddArgument(argumentRun);
+            //rootCommand.AddArgument(argumentRun);
             rootCommand.AddOption(optionServerOnly);
             rootCommand.AddOption(optionNightly);
 
-            rootCommand.SetHandler(async (string[] runExe, bool nightly, bool serverOnly) =>
+            rootCommand.SetHandler(async (InvocationContext ctx) =>
             {
+                var nightly = ctx.ParseResult.GetValueForOption(optionNightly);
+                var serverOnly = ctx.ParseResult.GetValueForOption(optionServerOnly);
+
                 await Updater.Update(nightly, serverOnly);
 
-                if (runExe != null && runExe.Length > 0)
+                var passthrough = ctx.ParseResult.UnmatchedTokens;
+
+                if (passthrough.Count > 0)
                 {
-                    string command = string.Join(" ", runExe);
+                    string command = string.Join(" ", passthrough);
 
                     Logger.Log("Starting " + string.Join(" ", command));
 
@@ -51,7 +60,7 @@ namespace Luatrauma.AutoUpdater
 
                     Process.Start(info);
                 }
-            }, argumentRun, optionNightly, optionServerOnly);
+            });
 
             rootCommand.Invoke(args);
         }
