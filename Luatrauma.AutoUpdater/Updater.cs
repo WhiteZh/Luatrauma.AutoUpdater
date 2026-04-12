@@ -24,6 +24,9 @@ namespace Luatrauma.AutoUpdater
             }
         }
 
+            return response.Headers.ETag?.Tag;
+        }
+
         public async static Task Update(bool nightly = false, bool serverOnly = false)
         {
             Logger.Log("Starting update...");
@@ -59,23 +62,40 @@ namespace Luatrauma.AutoUpdater
             string patchZip = Path.Combine(tempFolder, "patch.zip");
             string extractionFolder = Path.Combine(tempFolder, "Extracted");
 
-            Logger.Log($"Downloading patch zip from {patchUrl}");
+            string etagFile = Path.Combine(tempFolder, "patch.etag");
 
-            try
+            string? remoteEtag = await GetRemoteETag(patchUrl);
+            string? localEtag = File.Exists(etagFile) ? await File.ReadAllTextAsync(etagFile) : null;
+
+            if (remoteEtag != null && remoteEtag == localEtag)
             {
-                using var client = new HttpClient();
-
-                byte[] fileBytes = await client.GetByteArrayAsync(patchUrl);
-
-                await File.WriteAllBytesAsync(patchZip, fileBytes);
+                Logger.Log("Patch has not changed. Skipping download.");
             }
-            catch (Exception e)
+            else
             {
-                Logger.Log($"Failed to download patch zip: {e.Message}");
-                return;
-            }
+                if (remoteEtag != null)
+                {
+                    await File.WriteAllTextAsync(etagFile, remoteEtag);
+                }
 
-            Logger.Log($"Downloaded patch zip to {patchZip}");
+                Logger.Log($"Downloading patch zip from {patchUrl}");
+
+                try
+                {
+                    using var client = new HttpClient();
+
+                    byte[] fileBytes = await client.GetByteArrayAsync(patchUrl);
+
+                    await File.WriteAllBytesAsync(patchZip, fileBytes);
+                }
+                catch (Exception e)
+                {
+                    Logger.Log($"Failed to download patch zip: {e.Message}");
+                    return;
+                }
+
+                Logger.Log($"Downloaded patch zip to {patchZip}");
+            }
 
             try
             {
