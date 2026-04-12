@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 
 namespace Luatrauma.AutoUpdater
@@ -44,9 +45,12 @@ namespace Luatrauma.AutoUpdater
 
                 await Updater.Update(nightly, serverOnly);
 
-                var passthrough = ctx.ParseResult.UnmatchedTokens;
+                // Steam linux forces me to do terrible things...
+                string[] passthrough = args
+                    .Where(a => a != "--nightly" && a != "--server-only")
+                    .ToArray();
 
-                if (passthrough.Count > 0)
+                if (passthrough.Length > 0)
                 {
                     string command = string.Join(" ", passthrough);
 
