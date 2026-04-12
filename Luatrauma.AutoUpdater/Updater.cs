@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +24,12 @@ namespace Luatrauma.AutoUpdater
                 File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
             }
         }
+
+        private static async Task<string?> GetRemoteETag(string url)
+        {
+            using var client = new HttpClient();
+            using var request = new HttpRequestMessage(HttpMethod.Head, url);
+            using var response = await client.SendAsync(request);
 
             return response.Headers.ETag?.Tag;
         }
