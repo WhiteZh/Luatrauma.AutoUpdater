@@ -23,25 +23,30 @@ namespace Luatrauma.AutoUpdater
             optionServerOnly.SetDefaultValue(false);
             var optionNightly = new Option<bool>(name: "--nightly", description: "Downloads the nightly patch.");
             optionNightly.SetDefaultValue(false);
-            var argumentRun = new Argument<string?>("run", "The path to the Barotrauma executable that should be ran after the update finishes.");
+            var argumentRun = new Argument<string[]>("run", "The path to the Barotrauma executable that should be ran after the update finishes.")
+            {
+                Arity = ArgumentArity.ZeroOrMore
+            };
             argumentRun.SetDefaultValue(null);
 
             rootCommand.AddArgument(argumentRun);
             rootCommand.AddOption(optionServerOnly);
             rootCommand.AddOption(optionNightly);
 
-            rootCommand.SetHandler(async (string? runExe, bool nightly, bool serverOnly) =>
+            rootCommand.SetHandler(async (string[] runExe, bool nightly, bool serverOnly) =>
             {
                 await Updater.Update(nightly, serverOnly);
 
-                if (runExe != null)
+                if (runExe != null && runExe.Length > 0)
                 {
-                    Logger.Log("Starting " + string.Join(" ", runExe));
+                    string command = string.Join(" ", runExe);
+
+                    Logger.Log("Starting " + string.Join(" ", command));
 
                     var info = new ProcessStartInfo
                     {
-                        FileName = runExe,
-                        WorkingDirectory = Path.GetDirectoryName(runExe)
+                        FileName = command,
+                        WorkingDirectory = Path.GetDirectoryName(command)
                     };
 
                     Process.Start(info);
