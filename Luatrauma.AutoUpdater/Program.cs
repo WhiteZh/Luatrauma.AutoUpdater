@@ -58,8 +58,9 @@ namespace Luatrauma.AutoUpdater
 
                     var info = new ProcessStartInfo
                     {
-                        FileName = command,
-                        WorkingDirectory = Path.GetDirectoryName(command)
+                        FileName = args[0],
+                        Arguments = string.Join(" ", args.Skip(1)),
+                        WorkingDirectory = Path.GetDirectoryName(args[0]),
                     };
 
                     Process.Start(info);
