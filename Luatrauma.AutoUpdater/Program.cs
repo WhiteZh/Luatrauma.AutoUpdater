@@ -17,6 +17,8 @@ namespace Luatrauma.AutoUpdater
 
             var rootCommand = new RootCommand("Luatrauma AutoUpdater");
 
+            rootCommand.TreatUnmatchedTokensAsErrors = false;
+
             var optionServerOnly = new Option<bool>(name: "--server-only", description: "Downloads only the client patch.");
             optionServerOnly.SetDefaultValue(false);
             var optionNightly = new Option<bool>(name: "--nightly", description: "Downloads the nightly patch.");
