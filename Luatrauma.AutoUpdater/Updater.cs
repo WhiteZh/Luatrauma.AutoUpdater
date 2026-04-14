@@ -74,7 +74,7 @@ namespace Luatrauma.AutoUpdater
             string? remoteEtag = await GetRemoteETag(patchUrl);
             string? localEtag = File.Exists(etagFile) ? await File.ReadAllTextAsync(etagFile) : null;
 
-            if (remoteEtag != null && remoteEtag == localEtag)
+            if (false && remoteEtag != null && remoteEtag == localEtag)
             {
                 Logger.Log("Patch has not changed. Skipping download.");
             }
