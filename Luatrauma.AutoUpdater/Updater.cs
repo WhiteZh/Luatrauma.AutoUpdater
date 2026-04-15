@@ -155,8 +155,8 @@ namespace Luatrauma.AutoUpdater
             var currentVersion = FileVersionInfo.GetVersionInfo(currentDll);
             var newVersion = FileVersionInfo.GetVersionInfo(newDll);
             
-            Logger.Log($"current ddl version: {currentVersion}");
-            Logger.Log($"new ddl version:     {newVersion}");
+            Logger.Log($"current ddl version: {currentVersion.FileVersion}");
+            Logger.Log($"new ddl version:     {newVersion.FileVersion}");
 
             if (currentVersion.FileVersion == null || newVersion.FileVersion == null)
             {
