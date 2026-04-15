@@ -108,32 +108,67 @@ namespace Luatrauma.AutoUpdater
                 }
             }
 
+            string dllFile = "Barotrauma.dll";
+            if (serverOnly)
+            {
+                dllFile = "DedicatedServer.dll";
+            }
+
             try
             {
-                if (Directory.Exists(extractionFolder))
+                try
                 {
-                    Directory.Delete(extractionFolder, true);
+                    if (!Directory.Exists(extractionFolder))
+                    {
+                        throw new Exception();
+                    }
+                    
+                    string existingExtractedDll = Path.Combine(extractionFolder, dllFile);
+                    string tempDll = Path.Combine(tempFolder, "TempDll.dll");
+
+                    if (File.Exists(tempDll))
+                    {
+                        File.Delete(tempDll);
+                    }
+                    ZipFile.Open(patchZip, ZipArchiveMode.Read).GetEntry(dllFile)!.ExtractToFile(tempDll);
+                    
+                    // if existingExtractedDll doesn't exist, next line will throw, so no need for addition check
+                    var existingExtractedVersionInfo = FileVersionInfo.GetVersionInfo(existingExtractedDll);
+                    var tempVersionInfo = FileVersionInfo.GetVersionInfo(tempDll);
+                    
+                    Logger.Log($"existing extracted dll version: {existingExtractedVersionInfo.FileVersion}");
+                    Logger.Log($"patch zip dll version:          {tempVersionInfo.FileVersion}");
+
+                    if (existingExtractedVersionInfo.FileVersion == null || existingExtractedVersionInfo.FileVersion != tempVersionInfo.FileVersion)
+                    {
+                        throw new Exception();
+                    }
+                    
+                    Logger.Log("Existing files inside the extraction folder is on the same version as the downloaded patch zip. New extraction skipped.");
                 }
-                Directory.CreateDirectory(extractionFolder);
+                catch (Exception e)
+                {
+                    Logger.Log("Existing files inside the extraction folder are outdated or simply non-existing. Performing new extraction...");
+                    
+                    if (Directory.Exists(extractionFolder))
+                    {
+                        Directory.Delete(extractionFolder, true);
+                    }
 
-                ZipFile.ExtractToDirectory(patchZip, extractionFolder, true);
+                    Directory.CreateDirectory(extractionFolder);
 
+                    ZipFile.ExtractToDirectory(patchZip, extractionFolder, true);
+                    
+                    Logger.Log($"Extracted patch zip to {extractionFolder}");
+                }
             }
             catch (Exception e)
             {
                 Logger.Log($"Failed to extract patch zip: {e.Message}");
                 return;
             }
-
-            Logger.Log($"Extracted patch zip to {Directory.GetCurrentDirectory()}");
-
+            
             Logger.Log($"Applying patch...");
-
-            string dllFile = "Barotrauma.dll";
-            if (serverOnly)
-            {
-                dllFile = "DedicatedServer.dll";
-            }
 
             // Verify that the dll version is the same as the current one
             string currentDll = Path.Combine(Directory.GetCurrentDirectory(), dllFile);
