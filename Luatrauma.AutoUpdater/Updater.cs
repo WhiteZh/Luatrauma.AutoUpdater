@@ -214,9 +214,21 @@ namespace Luatrauma.AutoUpdater
                 return;
             }
 
-            CopyFilesRecursively(extractionFolder, Directory.GetCurrentDirectory());
+            string lastModdedVersionFilePath = Path.Combine(tempFolder, "lastModdedVersion.txt");
+            string? lastModdedVersion = File.Exists(lastModdedVersionFilePath) ? await File.ReadAllTextAsync(lastModdedVersionFilePath) : null;
+            
+            if (lastModdedVersion != null && lastModdedVersion == currentVersion.FileVersion)
+            {
+                Logger.Log("Game is already modded. Patch skipped.");
+            }
+            else
+            {
+                CopyFilesRecursively(extractionFolder, Directory.GetCurrentDirectory());
 
-            Logger.Log("Patch applied.");
+                Logger.Log("Patch applied.");
+
+                await File.WriteAllTextAsync(lastModdedVersionFilePath, currentVersion.FileVersion);
+            }
 
             if (File.Exists("luacsversion.txt")) // Workshop stuff, get rid of it so it doesn't interfere
             {
