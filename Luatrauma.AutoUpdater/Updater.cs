@@ -159,7 +159,7 @@ namespace Luatrauma.AutoUpdater
             Logger.Log($"current ddl version: {currentVersion}");
             Logger.Log($"new ddl version:     {newVersion}");
 
-            if (currentVersion == null || newVersion == null)
+            if (currentVersion.FileVersion == null || newVersion.FileVersion == null)
             {
                 Logger.Log("Failed to get version info for the dlls");
                 return;
