@@ -58,8 +58,7 @@ namespace Luatrauma.AutoUpdater
                 if (serverOnly) { patchUrl += "luacsforbarotrauma_patch_mac_server.zip"; }
                 else { patchUrl += "luacsforbarotrauma_patch_mac_client.zip"; }
             }
-
-            if (patchUrl == null)
+            else
             {
                 Logger.Log("Unsupported operating system.");
                 return;
