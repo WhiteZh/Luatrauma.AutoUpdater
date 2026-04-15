@@ -64,6 +64,8 @@ namespace Luatrauma.AutoUpdater
                 Logger.Log("Unsupported operating system.");
                 return;
             }
+            
+            Logger.Log($"patchUrl = {patchUrl}");
 
             string tempFolder = Path.Combine(Directory.GetCurrentDirectory(), "Luatrauma.AutoUpdater.Temp");
             string patchZip = Path.Combine(tempFolder, "patch.zip");
@@ -73,8 +75,11 @@ namespace Luatrauma.AutoUpdater
 
             string? remoteEtag = await GetRemoteETag(patchUrl);
             string? localEtag = File.Exists(etagFile) ? await File.ReadAllTextAsync(etagFile) : null;
+            
+            Logger.Log($"remoteEtag = {remoteEtag}");
+            Logger.Log($"localEtag  = {localEtag}");
 
-            if (false && remoteEtag != null && remoteEtag == localEtag)
+            if (remoteEtag != null && remoteEtag == localEtag)
             {
                 Logger.Log("Patch has not changed. Skipping download.");
             }
@@ -150,6 +155,9 @@ namespace Luatrauma.AutoUpdater
             // Grab the version of the current dll
             var currentVersion = FileVersionInfo.GetVersionInfo(currentDll);
             var newVersion = FileVersionInfo.GetVersionInfo(newDll);
+            
+            Logger.Log($"current ddl version: {currentVersion}");
+            Logger.Log($"new ddl version:     {newVersion}");
 
             if (currentVersion == null || newVersion == null)
             {
