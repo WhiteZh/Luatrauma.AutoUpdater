@@ -84,11 +84,6 @@ namespace Luatrauma.AutoUpdater
             }
             else
             {
-                if (remoteEtag != null)
-                {
-                    await File.WriteAllTextAsync(etagFile, remoteEtag);
-                }
-
                 Logger.Log($"Downloading patch zip from {patchUrl}");
 
                 try
@@ -106,6 +101,11 @@ namespace Luatrauma.AutoUpdater
                 }
 
                 Logger.Log($"Downloaded patch zip to {patchZip}");
+                
+                if (remoteEtag != null)
+                {
+                    await File.WriteAllTextAsync(etagFile, remoteEtag);
+                }
             }
 
             try
