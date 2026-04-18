@@ -64,7 +64,7 @@ namespace Luatrauma.AutoUpdater
                 return;
             }
             
-            Logger.Log($"patchUrl = {patchUrl}");
+            Logger.Log($"{nameof(patchUrl)} = {patchUrl}");
 
             string tempFolder = Path.Combine(Directory.GetCurrentDirectory(), "Luatrauma.AutoUpdater.Temp");
             string patchZip = Path.Combine(tempFolder, "patch.zip");
@@ -75,10 +75,10 @@ namespace Luatrauma.AutoUpdater
             string? remoteEtag = await GetRemoteETag(patchUrl);
             string? localEtag = File.Exists(etagFile) ? await File.ReadAllTextAsync(etagFile) : null;
             
-            Logger.Log($"remoteEtag = {remoteEtag}");
-            Logger.Log($"localEtag  = {localEtag}");
+            Logger.Log($"{nameof(remoteEtag)} = {remoteEtag}");
+            Logger.Log($"{nameof(localEtag)}  = {localEtag}");
 
-            if (remoteEtag != null && remoteEtag == localEtag)
+            if (remoteEtag is not null && remoteEtag == localEtag)
             {
                 Logger.Log("Patch has not changed. Skipping download.");
             }
@@ -102,7 +102,7 @@ namespace Luatrauma.AutoUpdater
 
                 Logger.Log($"Downloaded patch zip to {patchZip}");
                 
-                if (remoteEtag != null)
+                if (remoteEtag is not null)
                 {
                     await File.WriteAllTextAsync(etagFile, remoteEtag);
                 }
@@ -137,7 +137,7 @@ namespace Luatrauma.AutoUpdater
                 Logger.Log($"existing extracted dll version: {existingExtractedVersionInfo.FileVersion}");
                 Logger.Log($"patch zip dll version:          {tempVersionInfo.FileVersion}");
 
-                if (existingExtractedVersionInfo.FileVersion == null || existingExtractedVersionInfo.FileVersion != tempVersionInfo.FileVersion)
+                if (existingExtractedVersionInfo.FileVersion is null || existingExtractedVersionInfo.FileVersion != tempVersionInfo.FileVersion)
                 {
                     throw new Exception();
                 }
@@ -193,7 +193,7 @@ namespace Luatrauma.AutoUpdater
             Logger.Log($"current ddl version: {currentVersion.FileVersion}");
             Logger.Log($"new ddl version:     {newVersion.FileVersion}");
 
-            if (currentVersion.FileVersion == null || newVersion.FileVersion == null)
+            if (currentVersion.FileVersion is null || newVersion.FileVersion is null)
             {
                 Logger.Log("Failed to get version info for the dlls");
                 return;
@@ -217,7 +217,7 @@ namespace Luatrauma.AutoUpdater
             string lastModdedVersionFilePath = Path.Combine(tempFolder, "lastModdedVersion.txt");
             string? lastModdedVersion = File.Exists(lastModdedVersionFilePath) ? await File.ReadAllTextAsync(lastModdedVersionFilePath) : null;
             
-            if (lastModdedVersion != null && lastModdedVersion == currentVersion.FileVersion)
+            if (lastModdedVersion is not null && lastModdedVersion == currentVersion.FileVersion)
             {
                 Logger.Log("Game is already modded. Patch skipped.");
             }
