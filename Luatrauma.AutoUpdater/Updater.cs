@@ -113,6 +113,8 @@ namespace Luatrauma.AutoUpdater
             {
                 dllFile = "DedicatedServer.dll";
             }
+            
+            Logger.Log($"Applying patch...");
 
             try
             {
@@ -167,8 +169,6 @@ namespace Luatrauma.AutoUpdater
 
                 Logger.Log($"Extracted patch zip to {extractionFolder}");
             }
-            
-            Logger.Log($"Applying patch...");
 
             // Verify that the dll version is the same as the current one
             string currentDll = Path.Combine(Directory.GetCurrentDirectory(), dllFile);
