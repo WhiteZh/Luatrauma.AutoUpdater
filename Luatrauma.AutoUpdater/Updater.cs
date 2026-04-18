@@ -219,7 +219,7 @@ namespace Luatrauma.AutoUpdater
             
             if (lastModdedVersion is not null && lastModdedVersion == currentVersion.FileVersion)
             {
-                Logger.Log("Game is already modded. Patch skipped.");
+                Logger.Log("Game is already modded with the latest patch. Patch skipped.");
             }
             else
             {
