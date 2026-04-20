@@ -78,8 +78,10 @@ namespace Luatrauma.AutoUpdater
             Logger.Log($"{nameof(remoteEtag)} = {remoteEtag}");
             Logger.Log($"{nameof(localEtag)}  = {localEtag}");
 
+            bool skippedDownload = false;
             if (remoteEtag is not null && remoteEtag == localEtag)
             {
+                skippedDownload = true;
                 Logger.Log("Patch has not changed. Skipping download.");
             }
             else
@@ -116,35 +118,34 @@ namespace Luatrauma.AutoUpdater
             
             Logger.Log($"Applying patch...");
 
+            string lastExtractedPatchZipMd5HashTxt = Path.Combine(tempFolder, "lastExtractedPatchZipMd5Hash.txt");
+            string patchZipMd5Hash;
+            await using (var patchZipFileStream = File.OpenRead(patchZip))
+            {
+                patchZipMd5Hash = Convert.ToHexString(await MD5.Create().ComputeHashAsync(patchZipFileStream)).ToLowerInvariant();
+            }
             try
             {
+                if (!skippedDownload)
+                {
+                    throw new Exception();
+                }
                 if (!Directory.Exists(extractionFolder))
                 {
                     throw new Exception();
                 }
-                
-                string existingExtractedDll = Path.Combine(extractionFolder, dllFile);
-                string tempDll = Path.Combine(tempFolder, "TempDll.dll");
 
-                if (File.Exists(tempDll))
-                {
-                    File.Delete(tempDll);
-                }
-                ZipFile.Open(patchZip, ZipArchiveMode.Read).GetEntry(dllFile)!.ExtractToFile(tempDll);
+                string? lastExtractedPatchZipMd5Hash = File.Exists(lastExtractedPatchZipMd5HashTxt) ? await File.ReadAllTextAsync(lastExtractedPatchZipMd5HashTxt) : null;
                 
-                // if existingExtractedDll doesn't exist, next line will throw, so no need for addition check
-                var existingExtractedVersionInfo = FileVersionInfo.GetVersionInfo(existingExtractedDll);
-                var tempVersionInfo = FileVersionInfo.GetVersionInfo(tempDll);
-                
-                Logger.Log($"existing extracted dll version: {existingExtractedVersionInfo.FileVersion}");
-                Logger.Log($"patch zip dll version:          {tempVersionInfo.FileVersion}");
+                Logger.Log($"{nameof(lastExtractedPatchZipMd5Hash)} = {lastExtractedPatchZipMd5Hash}");
+                Logger.Log($"{nameof(patchZipMd5Hash)}              = {patchZipMd5Hash}");
 
-                if (existingExtractedVersionInfo.FileVersion is null || existingExtractedVersionInfo.FileVersion != tempVersionInfo.FileVersion)
+                if (lastExtractedPatchZipMd5Hash is null || lastExtractedPatchZipMd5Hash != patchZipMd5Hash)
                 {
                     throw new Exception();
                 }
-                
-                Logger.Log("Existing files inside the extraction folder is on the same version as the downloaded patch zip. New extraction skipped.");
+
+                Logger.Log("Files inside the patch zip is already extracted to the extraction folder. New extraction skipped.");
             }
             catch (Exception)
             {
@@ -166,6 +167,8 @@ namespace Luatrauma.AutoUpdater
                     Logger.Log($"Failed to extract patch zip: {e.Message}");
                     return;
                 }
+
+                await File.WriteAllTextAsync(lastExtractedPatchZipMd5HashTxt, patchZipMd5Hash);
 
                 Logger.Log($"Extracted patch zip to {extractionFolder}");
             }
