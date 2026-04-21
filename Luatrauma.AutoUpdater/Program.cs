@@ -54,16 +54,9 @@ namespace Luatrauma.AutoUpdater
                 {
                     string command = string.Join(" ", passthrough);
 
-                    Logger.Log("Starting " + string.Join(" ", command));
+                    Logger.Log("Starting " + command);
 
-                    var info = new ProcessStartInfo
-                    {
-                        FileName = args[0],
-                        Arguments = string.Join(" ", args.Skip(1)),
-                        WorkingDirectory = Path.GetDirectoryName(args[0]),
-                    };
-
-                    Process.Start(info);
+                    Process.Start(passthrough[0], passthrough.Skip(1));
                 }
             });
 
