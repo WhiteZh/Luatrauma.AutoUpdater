@@ -34,7 +34,7 @@ namespace Luatrauma.AutoUpdater
             return response.Headers.ETag?.Tag;
         }
 
-        public async static Task Update(bool nightly = false, bool serverOnly = false)
+        public async static Task Update(bool nightly = false, bool serverOnly = false, bool forceWindows = false)
         {
             Logger.Log("Starting update...");
 
@@ -43,7 +43,7 @@ namespace Luatrauma.AutoUpdater
             {
                 patchUrl = "https://github.com/evilfactory/LuaCsForBarotrauma/releases/download/nightly/";
             }
-            if (OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows() || forceWindows)
             {
                 if (serverOnly) { patchUrl += "luacsforbarotrauma_patch_windows_server.zip"; }
                 else { patchUrl += "luacsforbarotrauma_patch_windows_client.zip"; }

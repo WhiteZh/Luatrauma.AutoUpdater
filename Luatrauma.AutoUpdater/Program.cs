@@ -25,6 +25,8 @@ namespace Luatrauma.AutoUpdater
             optionServerOnly.SetDefaultValue(false);
             var optionNightly = new Option<bool>(name: "--nightly", description: "Downloads the nightly patch.");
             optionNightly.SetDefaultValue(false);
+            var optionForceWindows = new Option<bool>(name: "--force-windows", description: "Downloads the patch for Windows OS regardless of the actual OS.");
+            optionForceWindows.SetDefaultValue(false);
 
             /*
             var argumentRun = new Argument<string[]>("run", "The path to the Barotrauma executable that should be ran after the update finishes.")
@@ -37,24 +39,24 @@ namespace Luatrauma.AutoUpdater
             //rootCommand.AddArgument(argumentRun);
             rootCommand.AddOption(optionServerOnly);
             rootCommand.AddOption(optionNightly);
+            rootCommand.AddOption(optionForceWindows);
 
             rootCommand.SetHandler(async (InvocationContext ctx) =>
             {
                 var nightly = ctx.ParseResult.GetValueForOption(optionNightly);
                 var serverOnly = ctx.ParseResult.GetValueForOption(optionServerOnly);
+                var forceWindows = ctx.ParseResult.GetValueForOption(optionForceWindows);
 
-                await Updater.Update(nightly, serverOnly);
+                await Updater.Update(nightly, serverOnly, forceWindows);
 
                 // Steam linux forces me to do terrible things...
-                string[] passthrough = args
-                    .Where(a => a != "--nightly" && a != "--server-only")
-                    .ToArray();
+                string[] passthrough = ctx.ParseResult.UnmatchedTokens.ToArray();
 
                 if (passthrough.Length > 0)
                 {
-                    string command = string.Join(" ", passthrough);
-
-                    Logger.Log("Starting " + command);
+                    string passthroughStringRepresentation = $"[{string.Join(", ", passthrough.Select(s => $"\"{s}\""))}]";
+                    
+                    Logger.Log("Starting " + passthroughStringRepresentation);
 
                     Process.Start(passthrough[0], passthrough.Skip(1));
                 }
