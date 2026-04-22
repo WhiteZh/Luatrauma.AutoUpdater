@@ -41,6 +41,9 @@ namespace Luatrauma.AutoUpdater
             rootCommand.AddOption(optionNightly);
             rootCommand.AddOption(optionForceWindows);
 
+            var varargs = new Argument<string[]>();
+            rootCommand.AddArgument(varargs);
+
             rootCommand.SetHandler(async (InvocationContext ctx) =>
             {
                 var nightly = ctx.ParseResult.GetValueForOption(optionNightly);
@@ -50,7 +53,7 @@ namespace Luatrauma.AutoUpdater
                 await Updater.Update(nightly, serverOnly, forceWindows);
 
                 // Steam linux forces me to do terrible things...
-                string[] passthrough = ctx.ParseResult.UnmatchedTokens.ToArray();
+                string[] passthrough = ctx.ParseResult.GetValueForArgument(varargs);
 
                 if (passthrough.Length > 0)
                 {
