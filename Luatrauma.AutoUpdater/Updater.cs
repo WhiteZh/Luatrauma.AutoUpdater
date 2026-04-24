@@ -217,10 +217,13 @@ namespace Luatrauma.AutoUpdater
                 return;
             }
 
-            string lastModdedVersionFilePath = Path.Combine(tempFolder, "lastModdedVersion.txt");
-            string? lastModdedVersion = File.Exists(lastModdedVersionFilePath) ? await File.ReadAllTextAsync(lastModdedVersionFilePath) : null;
+            string lastModdedPatchZipMd5HashFilePath = Path.Combine(tempFolder, "lastModdedPatchZipMd5Hash.txt");
+            string? lastModdedPatchZipMd5Hash = File.Exists(lastModdedPatchZipMd5HashFilePath) ? await File.ReadAllTextAsync(lastModdedPatchZipMd5HashFilePath) : null;
             
-            if (lastModdedVersion is not null && lastModdedVersion == currentVersion.FileVersion)
+            Logger.Log($"{nameof(lastModdedPatchZipMd5Hash)} = {lastModdedPatchZipMd5Hash}");
+            Logger.Log($"{nameof(patchZipMd5Hash)}           = {patchZipMd5Hash}");
+            
+            if (lastModdedPatchZipMd5Hash is not null && lastModdedPatchZipMd5Hash == patchZipMd5Hash)
             {
                 Logger.Log("Game is already modded with the latest patch. Patch skipped.");
             }
@@ -230,7 +233,7 @@ namespace Luatrauma.AutoUpdater
 
                 Logger.Log("Patch applied.");
 
-                await File.WriteAllTextAsync(lastModdedVersionFilePath, currentVersion.FileVersion);
+                await File.WriteAllTextAsync(lastModdedPatchZipMd5HashFilePath, patchZipMd5Hash);
             }
 
             if (File.Exists("luacsversion.txt")) // Workshop stuff, get rid of it so it doesn't interfere
