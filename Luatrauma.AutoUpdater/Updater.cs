@@ -118,12 +118,7 @@ namespace Luatrauma.AutoUpdater
             
             Logger.Log($"Applying patch...");
 
-            string lastExtractedPatchZipMd5HashTxt = Path.Combine(tempFolder, "lastExtractedPatchZipMd5Hash.txt");
-            string patchZipMd5Hash;
-            await using (var patchZipFileStream = File.OpenRead(patchZip))
-            {
-                patchZipMd5Hash = Convert.ToHexString(await MD5.Create().ComputeHashAsync(patchZipFileStream)).ToLowerInvariant();
-            }
+            string extractEtagFilePath = Path.Combine(tempFolder, "extract.etag");
             try
             {
                 if (!skippedDownload)
@@ -135,12 +130,12 @@ namespace Luatrauma.AutoUpdater
                     throw new Exception();
                 }
 
-                string? lastExtractedPatchZipMd5Hash = File.Exists(lastExtractedPatchZipMd5HashTxt) ? await File.ReadAllTextAsync(lastExtractedPatchZipMd5HashTxt) : null;
-                
-                Logger.Log($"{nameof(lastExtractedPatchZipMd5Hash)} = {lastExtractedPatchZipMd5Hash}");
-                Logger.Log($"{nameof(patchZipMd5Hash)}              = {patchZipMd5Hash}");
+                string? extractEtag = File.Exists(extractEtagFilePath) ? await File.ReadAllTextAsync(extractEtagFilePath) : null;
 
-                if (lastExtractedPatchZipMd5Hash is null || lastExtractedPatchZipMd5Hash != patchZipMd5Hash)
+                Logger.Log($"{nameof(remoteEtag)}  = {remoteEtag}");
+                Logger.Log($"{nameof(extractEtag)} = {extractEtag}");
+
+                if (extractEtag is null || extractEtag != remoteEtag)
                 {
                     throw new Exception();
                 }
@@ -168,7 +163,7 @@ namespace Luatrauma.AutoUpdater
                     return;
                 }
 
-                await File.WriteAllTextAsync(lastExtractedPatchZipMd5HashTxt, patchZipMd5Hash);
+                await File.WriteAllTextAsync(extractEtagFilePath, remoteEtag);
 
                 Logger.Log($"Extracted patch zip to {extractionFolder}");
             }
@@ -217,13 +212,13 @@ namespace Luatrauma.AutoUpdater
                 return;
             }
 
-            string lastModdedPatchZipMd5HashFilePath = Path.Combine(tempFolder, "lastModdedPatchZipMd5Hash.txt");
-            string? lastModdedPatchZipMd5Hash = File.Exists(lastModdedPatchZipMd5HashFilePath) ? await File.ReadAllTextAsync(lastModdedPatchZipMd5HashFilePath) : null;
+            string applyEtagFilePath = Path.Combine(tempFolder, "apply.etag");
+            string? applyEtag = File.Exists(applyEtagFilePath) ? await File.ReadAllTextAsync(applyEtagFilePath) : null;
             
-            Logger.Log($"{nameof(lastModdedPatchZipMd5Hash)} = {lastModdedPatchZipMd5Hash}");
-            Logger.Log($"{nameof(patchZipMd5Hash)}           = {patchZipMd5Hash}");
+            Logger.Log($"{nameof(remoteEtag)} = {remoteEtag}");
+            Logger.Log($"{nameof(applyEtag)}  = {applyEtag}");
             
-            if (lastModdedPatchZipMd5Hash is not null && lastModdedPatchZipMd5Hash == patchZipMd5Hash)
+            if (applyEtag is not null && applyEtag == remoteEtag)
             {
                 Logger.Log("Game is already modded with the latest patch. Patch skipped.");
             }
@@ -233,7 +228,7 @@ namespace Luatrauma.AutoUpdater
 
                 Logger.Log("Patch applied.");
 
-                await File.WriteAllTextAsync(lastModdedPatchZipMd5HashFilePath, patchZipMd5Hash);
+                await File.WriteAllTextAsync(applyEtagFilePath, remoteEtag);
             }
 
             if (File.Exists("luacsversion.txt")) // Workshop stuff, get rid of it so it doesn't interfere
