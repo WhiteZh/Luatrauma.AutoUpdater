@@ -163,7 +163,14 @@ namespace Luatrauma.AutoUpdater
                     return;
                 }
 
-                await File.WriteAllTextAsync(extractEtagFilePath, remoteEtag);
+                if (remoteEtag is not null)
+                {
+                    await File.WriteAllTextAsync(extractEtagFilePath, remoteEtag);
+                }
+                else
+                {
+                    File.Delete(extractEtagFilePath);
+                }
 
                 Logger.Log($"Extracted patch zip to {extractionFolder}");
             }
@@ -228,7 +235,14 @@ namespace Luatrauma.AutoUpdater
 
                 Logger.Log("Patch applied.");
 
-                await File.WriteAllTextAsync(applyEtagFilePath, remoteEtag);
+                if (remoteEtag is not null)
+                {
+                    await File.WriteAllTextAsync(applyEtagFilePath, remoteEtag);
+                }
+                else
+                {
+                    File.Delete(applyEtagFilePath);
+                }
             }
 
             if (File.Exists("luacsversion.txt")) // Workshop stuff, get rid of it so it doesn't interfere
