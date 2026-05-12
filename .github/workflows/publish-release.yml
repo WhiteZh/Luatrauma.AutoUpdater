@@ -3,7 +3,6 @@
 name: Publish release
 
 on:
-  workflow_dispatch:
   workflow_call:
     inputs:
       target:
